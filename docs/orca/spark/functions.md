@@ -1,6 +1,6 @@
 # Functions
 
-> Auto-generated documentation for [orca.spark.functions](..\..\..\orca\spark\functions.py) module.
+> Auto-generated documentation for [orca.spark.functions](https://github.com/krishnanaredla/Orca/blob/masterorca/spark/functions.py) module.
 
 - [Orca](..\..\README.md#orca-index) / [Modules](..\..\MODULES.md#orca-modules) / [Orca](..\index.md#orca) / [Spark](index.md#spark) / Functions
     - [multijoin](#multijoin)
@@ -9,7 +9,7 @@
 
 ## multijoin
 
-[[find in source code]](..\..\..\orca\spark\functions.py#L72)
+[[find in source code]](https://github.com/krishnanaredla/Orca/blob/masterorca/spark/functions.py#L72)
 
 ```python
 def multijoin(
@@ -51,7 +51,7 @@ Then collecting the ``DataFrame`` produced by
 
 ## performJoin
 
-[[find in source code]](..\..\..\orca\spark\functions.py#L27)
+[[find in source code]](https://github.com/krishnanaredla/Orca/blob/masterorca/spark/functions.py#L27)
 
 ```python
 def performJoin(
@@ -96,7 +96,7 @@ Example :
 
 ## singleJoin
 
-[[find in source code]](..\..\..\orca\spark\functions.py#L11)
+[[find in source code]](https://github.com/krishnanaredla/Orca/blob/masterorca/spark/functions.py#L11)
 
 ```python
 def singleJoin(

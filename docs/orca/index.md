@@ -1,6 +1,6 @@
 # Orca
 
-> Auto-generated documentation for [orca](..\..\orca\__init__.py) module.
+> Auto-generated documentation for [orca](https://github.com/krishnanaredla/Orca/blob/masterorca/__init__.py) module.
 
 - [Orca](..\README.md#orca-index) / [Modules](..\MODULES.md#orca-modules) / Orca
     - Modules
