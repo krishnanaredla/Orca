@@ -9,7 +9,7 @@
 
 ## multijoin
 
-[[find in source code]](https://github.com/krishnanaredla/Orca/blob/masterorca/spark/functions.py#L72)
+[[find in source code]](https://github.com/krishnanaredla/Orca/blob/master/orca/spark/functions.py#L72)
 
 ```python
 def multijoin(
