@@ -24,7 +24,7 @@ Join multiple dataframes.
 
 #### Arguments
 
-dfs (list[DataFrame]).
+-  dfs (list[DataFrame]).
 - `on` - same as ``pyspark.sql.DataFrame.join``.
 - `how` - same as ``pyspark.sql.DataFrame.join``.
 - `coalesce` *list[str]* - column names to disambiguate by coalescing
@@ -93,6 +93,7 @@ Example :
     |       1| null|        1|    1|       1|   10|
     |       2|    2|        2|   22|       2|  226|
     +--------+-----+---------+-----+--------+-----+
+```
 
 ## singleJoin
 
