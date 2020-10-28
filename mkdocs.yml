@@ -1,8 +1,0 @@
-site_name: "Orca"
-repo_url: "https://github.com/krishnanaredla/Orca/blob/master"
-site_dir: "site"
-docs_dir: "docs"
-
-theme:
-  name: readthedocs
-  include_sidebar: true

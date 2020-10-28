@@ -44,3 +44,60 @@ def test_multijoin(spark_test_session):
     output_df   = multijoin([first, second], on='id', how='inner', coalesce=['value'])
     assert_df_equality(output_df, expected_df)
     assert all([a == b for a, b in zip(output_df.columns, expected_df.columns)])
+
+def test_addColumnPrefix(spark_test_session):
+    """
+    Test addColumnPrefix
+    """
+    inputDF     = spark_test_session.createDataFrame([{'id': 1, 'value': 1}, {'id': 2, 'value': 22}])
+    expected_df = spark_test_session.createDataFrame([{'test_id': 1, 'value': 1}, {'test_id': 2, 'value': 22}])
+    output_df   = addColumnPrefix(inputDF,prefix='test',colsList=['id'])
+    assert_df_equality(output_df, expected_df)
+    assert all([a == b for a, b in zip(output_df.columns, expected_df.columns)])
+
+def test_addColumnSuffix(spark_test_session):
+    """
+    Test addColumnSuffix
+    """
+    inputDF     = spark_test_session.createDataFrame([{'id': 1, 'value': 1}, {'id': 2, 'value': 22}])
+    expected_df = spark_test_session.createDataFrame([{'id_test': 1, 'value_test': 1}, {'id_test': 2, 'value_test': 22}])
+    output_df   = addColumnSuffix(inputDF,suffix='test')
+    assert_df_equality(output_df, expected_df)
+    assert all([a == b for a, b in zip(output_df.columns, expected_df.columns)])
+
+def test_removeColumnSpaces(spark_test_session):
+    """
+    Test removeColumnSpaces
+    """
+    input_df    = spark_test_session.createDataFrame([{'id': 1, 'goods value': 1,'total amount':2}])
+    expected_df = spark_test_session.createDataFrame([{'id': 1, 'goodsvalue': 1,'totalamount':2}])
+    output_df   = removeColumnSpaces(input_df)
+    assert_df_equality(output_df, expected_df)
+    assert all([a == b for a, b in zip(output_df.columns, expected_df.columns)])
+
+def test_withSomeColumnsRenamed(spark_test_session):
+    """
+    test withSomeColumnsRenamed
+    """
+    input_df    = spark_test_session.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
+    expected_df = spark_test_session.createDataFrame([{'cash': 2, 'transaction': 1,'uniqueID': 1}])
+    mapping     = {'amount':'cash','id':'uniqueID','value':'transaction'}
+    output_df   =  withSomeColumnsRenamed(input_df,mapping)
+    assert_df_equality(output_df, expected_df)
+    assert all([a == b for a, b in zip(output_df.columns, expected_df.columns)])
+
+def test_withColumnsRenamedFunc(spark_test_session):
+    """
+    test withColumnsRenamedFunc
+    """
+    def renameF(s):
+            if 'amount' in s:
+                return 'cash'
+            else:
+                return s
+    input_df    = spark_test_session.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
+    expected_df = spark_test_session.createDataFrame([{'id': 1, 'value': 1,'cash':2}])
+    output_df   =  withColumnsRenamedFunc(input_df,renameF)
+    assert_df_equality(output_df, expected_df)
+    assert all([a == b for a, b in zip(output_df.columns, expected_df.columns)])
+

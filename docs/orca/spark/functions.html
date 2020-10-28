@@ -30,10 +30,11 @@
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
 
-from typing import List
+from typing import List, Dict, Callable
 from collections import defaultdict
 from functools import reduce
 from itertools import cycle
+import re
 
 
 def singleJoin(
@@ -42,10 +43,10 @@ def singleJoin(
     &#34;&#34;&#34;
     Performs a join between left and right dataframes
     Args:
-        left            -&gt;  pyspark DataFrame
-        right           -&gt;  pyspark DataFrame
-        condition       -&gt;  condition to join dataframes
-        joinType        -&gt;  type of join, default will be inner
+        left            :  pyspark DataFrame
+        right           :  pyspark DataFrame
+        condition       :  condition to join dataframes
+        joinType        :  type of join, default will be inner
     Return:
         DataFrame
     &#34;&#34;&#34;
@@ -58,13 +59,13 @@ def performJoin(
     &#34;&#34;&#34;
     Joins multiple dataframes with varying conditions and join types for each join
     Args:
-         dfs            -&gt;  list of dataframes to be joined,
+         dfs            :  list of dataframes to be joined,
                             hint can be given to each dataframe
                             List(df1,df2,df3,df4.hint(&#39;broadcast&#39;))
-         conditionList  -&gt;  list of conditions to join the dataframes
+         conditionList  :  list of conditions to join the dataframes
                             List(df1.id==df2.id,df3.id==df4.id)
                             can be empty
-         joinsList      -&gt;  list of types of joins between dataframes
+         joinsList      :  list of types of joins between dataframes
     Return:
          DataFrame
     Example :
@@ -150,7 +151,195 @@ def multijoin(
         for disambiguation in disambiguations:
             joined_df = joined_df.drop(disambiguation)
 
-    return joined_df</code></pre>
+    return joined_df
+
+
+def addColumnPrefix(
+    df: DataFrame, prefix: str = &#34;prefix&#34;, colsList: List = []
+) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Adds a prefix to Column names
+    Args:
+        df       : pyspark DataFrame
+        prefix   : prefix string which needs to be added default value
+                    will be `prefix`
+        colsList : Specify the column names to which only the prefix will be added.
+                    If nothing is passed, all columns will have the prefix.
+                    Default value will be empty list
+    Return:
+        pyspark Dataframe
+    Example:
+        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+        &gt;&gt;&gt;addColumnPrefix(df,prefix=&#39;test&#39;).show()
+            +-----------+-------+----------+
+            |test_amount|test_id|test_value|
+            +-----------+-------+----------+
+            |          2|      1|         1|
+            |          3|      2|         2|
+            +-----------+-------+----------+
+        &gt;&gt;&gt;addColumnPrefix(data,prefix=&#39;test&#39;).show()
+            +-----------+---+----------+
+            |test_amount| id|test_value|
+            +-----------+---+----------+
+            |          2|  1|         1|
+            |          3|  2|         2|
+            +-----------+---+----------+
+
+    &#34;&#34;&#34;
+    if not colsList:
+        colsList = df.columns
+
+    def _keyExists(s):
+        return s in colsList
+
+    cols = list(
+        map(
+            lambda col_name: F.col(col_name).alias(&#34;{0}_{1}&#34;.format(prefix, col_name))
+            if _keyExists(col_name)
+            else F.col(col_name),
+            df.columns,
+        )
+    )
+    return df.select(*cols)
+
+
+def addColumnSuffix(
+    df: DataFrame, suffix: str = &#34;suffix&#34;, colsList: List = []
+) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Adds a suffix to Column names
+    Args:
+        df       : pyspark DataFrame
+        suffix   : suffix string which needs to be added default value
+                    will be `suffix`
+        colsList : Specify the column names to which only the suffix will be added.
+                    If nothing is passed, all columns will have the suffix.
+                    Default value will be empty list
+    Return:
+        pyspark Dataframe
+    Example:
+        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;).show()
+            +-----------+-------+----------+
+            |amount_test|id_test|value_test|
+            +-----------+-------+----------+
+            |          2|      1|         1|
+            |          3|      2|         2|
+            +-----------+-------+----------+
+        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;,colsList=[&#39;id&#39;]).show()
+            +-----------+---+----------+
+            |amount_test| id|value_test|
+            +-----------+---+----------+
+            |          2|  1|         1|
+            |          3|  2|         2|
+            +-----------+---+----------+
+    &#34;&#34;&#34;
+    if not colsList:
+        colsList = df.columns
+
+    def _keyExists(s):
+        return s in colsList
+
+    cols = list(
+        map(
+            lambda col_name: F.col(col_name).alias(&#34;{0}_{1}&#34;.format(col_name, suffix))
+            if _keyExists(col_name)
+            else F.col(col_name),
+            df.columns,
+        )
+    )
+    return df.select(*cols)
+
+
+def removeColumnSpaces(df: DataFrame) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Adds a suffix to Column names
+    Args:
+        df       : pyspark DataFrame
+    Return:
+        pyspark Dataframe
+    Example:
+    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;goods value&#39;: 1,&#39;total amount&#39;:2}])
+    &gt;&gt;&gt;removeColumnSpaces(df).show()
+        +----------+---+-----------+
+        |goodsvalue| id|totalamount|
+        +----------+---+-----------+
+        |         1|  1|          2|
+        +----------+---+-----------+
+
+    &#34;&#34;&#34;
+    return df.select(
+        [
+            F.col(c).alias(&#34;{0}&#34;.format(re.sub(r&#34;\s+&#34;, &#34;&#34;, c, flags=re.UNICODE)))
+            for c in df.columns
+        ]
+    )
+
+
+def withSomeColumnsRenamed(df: DataFrame, mapping: Dict) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Changes some of the column names with supplied dictionary
+    Args:
+        df       : pyspark DataFrame
+        mapping  : Dict
+    Return:
+        pyspark Dataframe
+    Example:
+    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt;mapping = {&#39;amount&#39;:&#39;cash&#39;,&#39;id&#39;:&#39;uniqueID&#39;,&#39;value&#39;:&#39;transaction&#39;}
+    &gt;&gt;&gt;withSomeColumnsRenamed(df,mapping).show()
+        +----+--------+-----------+
+        |cash|uniqueID|transaction|
+        +----+--------+-----------+
+        |   2|       1|          1|
+        +----+--------+-----------+
+
+    &#34;&#34;&#34;
+
+    def _keys(s):
+        return mapping[s]
+
+    def _keysExists(s):
+        return s in mapping
+
+    cols = list(
+        map(
+            lambda col_name: F.col(col_name).alias(_keys(col_name))
+            if _keysExists(col_name)
+            else F.col(col_name),
+            df.columns,
+        )
+    )
+    return df.select(*cols)
+
+
+def withColumnsRenamedFunc(df: DataFrame, func: Callable) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Changes some of the column names with supplied function
+    Args:
+        df       : pyspark DataFrame
+        func     : Function
+    Return:
+        pyspark Dataframe
+    Example:
+    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt;def renameF(s):
+            if &#39;amount&#39; in s:
+                return &#39;cash&#39;
+            else:
+                return s
+    &gt;&gt;&gt;withColumnsRenamedFunc(df,renameF).show()
+        +----+---+-----+
+        |cash| id|value|
+        +----+---+-----+
+        |   2|  1|    1|
+        |   3|  2|    2|
+        +----+---+-----+
+
+
+    &#34;&#34;&#34;
+    cols = list(map(lambda col_name: F.col(col_name).alias(func(col_name)), df.columns))
+    return df.select(*cols)</code></pre>
 </details>
 </section>
 <section>
@@ -160,6 +349,211 @@ def multijoin(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="orca.spark.functions.addColumnPrefix"><code class="name flex">
+<span>def <span class="ident">addColumnPrefix</span></span>(<span>df: pyspark.sql.dataframe.DataFrame, prefix: str = 'prefix', colsList: List = []) ‑> pyspark.sql.dataframe.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a prefix to Column names</p>
+<h2 id="args">Args</h2>
+<p>df
+: pyspark DataFrame
+prefix
+: prefix string which needs to be added default value
+will be <code>prefix</code>
+colsList : Specify the column names to which only the prefix will be added.
+If nothing is passed, all columns will have the prefix.
+Default value will be empty list</p>
+<h2 id="return">Return</h2>
+<p>pyspark Dataframe</p>
+<h2 id="example">Example</h2>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}, {'id': 2, 'value': 2,'amount':3}])
+addColumnPrefix(df,prefix='test').show()
++-----------+-------+----------+
+|test_amount|test_id|test_value|
++-----------+-------+----------+
+|
+2|
+1|
+1|
+|
+3|
+2|
+2|
++-----------+-------+----------+
+addColumnPrefix(data,prefix='test').show()
++-----------+&mdash;+----------+
+|test_amount| id|test_value|
++-----------+&mdash;+----------+
+|
+2|
+1|
+1|
+|
+3|
+2|
+2|
++-----------+&mdash;+----------+</p>
+</blockquote>
+</blockquote>
+</blockquote></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def addColumnPrefix(
+    df: DataFrame, prefix: str = &#34;prefix&#34;, colsList: List = []
+) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Adds a prefix to Column names
+    Args:
+        df       : pyspark DataFrame
+        prefix   : prefix string which needs to be added default value
+                    will be `prefix`
+        colsList : Specify the column names to which only the prefix will be added.
+                    If nothing is passed, all columns will have the prefix.
+                    Default value will be empty list
+    Return:
+        pyspark Dataframe
+    Example:
+        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+        &gt;&gt;&gt;addColumnPrefix(df,prefix=&#39;test&#39;).show()
+            +-----------+-------+----------+
+            |test_amount|test_id|test_value|
+            +-----------+-------+----------+
+            |          2|      1|         1|
+            |          3|      2|         2|
+            +-----------+-------+----------+
+        &gt;&gt;&gt;addColumnPrefix(data,prefix=&#39;test&#39;).show()
+            +-----------+---+----------+
+            |test_amount| id|test_value|
+            +-----------+---+----------+
+            |          2|  1|         1|
+            |          3|  2|         2|
+            +-----------+---+----------+
+
+    &#34;&#34;&#34;
+    if not colsList:
+        colsList = df.columns
+
+    def _keyExists(s):
+        return s in colsList
+
+    cols = list(
+        map(
+            lambda col_name: F.col(col_name).alias(&#34;{0}_{1}&#34;.format(prefix, col_name))
+            if _keyExists(col_name)
+            else F.col(col_name),
+            df.columns,
+        )
+    )
+    return df.select(*cols)</code></pre>
+</details>
+</dd>
+<dt id="orca.spark.functions.addColumnSuffix"><code class="name flex">
+<span>def <span class="ident">addColumnSuffix</span></span>(<span>df: pyspark.sql.dataframe.DataFrame, suffix: str = 'suffix', colsList: List = []) ‑> pyspark.sql.dataframe.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a suffix to Column names</p>
+<h2 id="args">Args</h2>
+<p>df
+: pyspark DataFrame
+suffix
+: suffix string which needs to be added default value
+will be <code>suffix</code>
+colsList : Specify the column names to which only the suffix will be added.
+If nothing is passed, all columns will have the suffix.
+Default value will be empty list</p>
+<h2 id="return">Return</h2>
+<p>pyspark Dataframe</p>
+<h2 id="example">Example</h2>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}, {'id': 2, 'value': 2,'amount':3}])
+addColumnSuffix(df,suffix='test').show()
++-----------+-------+----------+
+|amount_test|id_test|value_test|
++-----------+-------+----------+
+|
+2|
+1|
+1|
+|
+3|
+2|
+2|
++-----------+-------+----------+
+addColumnSuffix(df,suffix='test',colsList=['id']).show()
++-----------+&mdash;+----------+
+|amount_test| id|value_test|
++-----------+&mdash;+----------+
+|
+2|
+1|
+1|
+|
+3|
+2|
+2|
++-----------+&mdash;+----------+</p>
+</blockquote>
+</blockquote>
+</blockquote></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def addColumnSuffix(
+    df: DataFrame, suffix: str = &#34;suffix&#34;, colsList: List = []
+) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Adds a suffix to Column names
+    Args:
+        df       : pyspark DataFrame
+        suffix   : suffix string which needs to be added default value
+                    will be `suffix`
+        colsList : Specify the column names to which only the suffix will be added.
+                    If nothing is passed, all columns will have the suffix.
+                    Default value will be empty list
+    Return:
+        pyspark Dataframe
+    Example:
+        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;).show()
+            +-----------+-------+----------+
+            |amount_test|id_test|value_test|
+            +-----------+-------+----------+
+            |          2|      1|         1|
+            |          3|      2|         2|
+            +-----------+-------+----------+
+        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;,colsList=[&#39;id&#39;]).show()
+            +-----------+---+----------+
+            |amount_test| id|value_test|
+            +-----------+---+----------+
+            |          2|  1|         1|
+            |          3|  2|         2|
+            +-----------+---+----------+
+    &#34;&#34;&#34;
+    if not colsList:
+        colsList = df.columns
+
+    def _keyExists(s):
+        return s in colsList
+
+    cols = list(
+        map(
+            lambda col_name: F.col(col_name).alias(&#34;{0}_{1}&#34;.format(col_name, suffix))
+            if _keyExists(col_name)
+            else F.col(col_name),
+            df.columns,
+        )
+    )
+    return df.select(*cols)</code></pre>
+</details>
+</dd>
 <dt id="orca.spark.functions.multijoin"><code class="name flex">
 <span>def <span class="ident">multijoin</span></span>(<span>dfs: List[pyspark.sql.dataframe.DataFrame], on: str = None, how: str = None, coalesce: List[str] = None)</span>
 </code></dt>
@@ -258,17 +652,17 @@ yields <code>[{'id': 1, 'value': 1}, {'id': 2, 'value': 2}]</code>.</p></div>
 <div class="desc"><p>Joins multiple dataframes with varying conditions and join types for each join</p>
 <h2 id="args">Args</h2>
 <p>dfs
--&gt;
+:
 list of dataframes to be joined,
 hint can be given to each dataframe
 List(df1,df2,df3,df4.hint('broadcast'))
 conditionList
--&gt;
+:
 list of conditions to join the dataframes
 List(df1.id==df2.id,df3.id==df4.id)
 can be empty
 joinsList
--&gt;
+:
 list of types of joins between dataframes</p>
 <h2 id="return">Return</h2>
 <p>DataFrame
@@ -313,13 +707,13 @@ second.second_id==third.third_id]).show()
     &#34;&#34;&#34;
     Joins multiple dataframes with varying conditions and join types for each join
     Args:
-         dfs            -&gt;  list of dataframes to be joined,
+         dfs            :  list of dataframes to be joined,
                             hint can be given to each dataframe
                             List(df1,df2,df3,df4.hint(&#39;broadcast&#39;))
-         conditionList  -&gt;  list of conditions to join the dataframes
+         conditionList  :  list of conditions to join the dataframes
                             List(df1.id==df2.id,df3.id==df4.id)
                             can be empty
-         joinsList      -&gt;  list of types of joins between dataframes
+         joinsList      :  list of types of joins between dataframes
     Return:
          DataFrame
     Example :
@@ -352,6 +746,62 @@ second.second_id==third.third_id]).show()
     return value</code></pre>
 </details>
 </dd>
+<dt id="orca.spark.functions.removeColumnSpaces"><code class="name flex">
+<span>def <span class="ident">removeColumnSpaces</span></span>(<span>df: pyspark.sql.dataframe.DataFrame) ‑> pyspark.sql.dataframe.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a suffix to Column names</p>
+<h2 id="args">Args</h2>
+<p>df
+: pyspark DataFrame</p>
+<h2 id="return">Return</h2>
+<p>pyspark Dataframe
+Example:</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>df = spark.createDataFrame([{'id': 1, 'goods value': 1,'total amount':2}])
+removeColumnSpaces(df).show()
++----------+&mdash;+-----------+
+|goodsvalue| id|totalamount|
++----------+&mdash;+-----------+
+|
+1|
+1|
+2|
++----------+&mdash;+-----------+</p>
+</blockquote>
+</blockquote>
+</blockquote></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def removeColumnSpaces(df: DataFrame) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Adds a suffix to Column names
+    Args:
+        df       : pyspark DataFrame
+    Return:
+        pyspark Dataframe
+    Example:
+    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;goods value&#39;: 1,&#39;total amount&#39;:2}])
+    &gt;&gt;&gt;removeColumnSpaces(df).show()
+        +----------+---+-----------+
+        |goodsvalue| id|totalamount|
+        +----------+---+-----------+
+        |         1|  1|          2|
+        +----------+---+-----------+
+
+    &#34;&#34;&#34;
+    return df.select(
+        [
+            F.col(c).alias(&#34;{0}&#34;.format(re.sub(r&#34;\s+&#34;, &#34;&#34;, c, flags=re.UNICODE)))
+            for c in df.columns
+        ]
+    )</code></pre>
+</details>
+</dd>
 <dt id="orca.spark.functions.singleJoin"><code class="name flex">
 <span>def <span class="ident">singleJoin</span></span>(<span>left: pyspark.sql.dataframe.DataFrame, right: pyspark.sql.dataframe.DataFrame, condition=None, joinType: str = None) ‑> pyspark.sql.dataframe.DataFrame</span>
 </code></dt>
@@ -359,16 +809,16 @@ second.second_id==third.third_id]).show()
 <div class="desc"><p>Performs a join between left and right dataframes</p>
 <h2 id="args">Args</h2>
 <p>left
--&gt;
+:
 pyspark DataFrame
 right
--&gt;
+:
 pyspark DataFrame
 condition
--&gt;
+:
 condition to join dataframes
 joinType
--&gt;
+:
 type of join, default will be inner</p>
 <h2 id="return">Return</h2>
 <p>DataFrame</p></div>
@@ -382,14 +832,156 @@ type of join, default will be inner</p>
     &#34;&#34;&#34;
     Performs a join between left and right dataframes
     Args:
-        left            -&gt;  pyspark DataFrame
-        right           -&gt;  pyspark DataFrame
-        condition       -&gt;  condition to join dataframes
-        joinType        -&gt;  type of join, default will be inner
+        left            :  pyspark DataFrame
+        right           :  pyspark DataFrame
+        condition       :  condition to join dataframes
+        joinType        :  type of join, default will be inner
     Return:
         DataFrame
     &#34;&#34;&#34;
     return left.join(right, condition, joinType)</code></pre>
+</details>
+</dd>
+<dt id="orca.spark.functions.withColumnsRenamedFunc"><code class="name flex">
+<span>def <span class="ident">withColumnsRenamedFunc</span></span>(<span>df: pyspark.sql.dataframe.DataFrame, func: Callable) ‑> pyspark.sql.dataframe.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Changes some of the column names with supplied function</p>
+<h2 id="args">Args</h2>
+<p>df
+: pyspark DataFrame
+func
+: Function</p>
+<h2 id="return">Return</h2>
+<p>pyspark Dataframe
+Example:</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
+def renameF(s):
+if 'amount' in s:
+return 'cash'
+else:
+return s
+withColumnsRenamedFunc(df,renameF).show()
++----+&mdash;+-----+
+|cash| id|value|
++----+&mdash;+-----+
+|
+2|
+1|
+1|
+|
+3|
+2|
+2|
++----+&mdash;+-----+</p>
+</blockquote>
+</blockquote>
+</blockquote></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def withColumnsRenamedFunc(df: DataFrame, func: Callable) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Changes some of the column names with supplied function
+    Args:
+        df       : pyspark DataFrame
+        func     : Function
+    Return:
+        pyspark Dataframe
+    Example:
+    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt;def renameF(s):
+            if &#39;amount&#39; in s:
+                return &#39;cash&#39;
+            else:
+                return s
+    &gt;&gt;&gt;withColumnsRenamedFunc(df,renameF).show()
+        +----+---+-----+
+        |cash| id|value|
+        +----+---+-----+
+        |   2|  1|    1|
+        |   3|  2|    2|
+        +----+---+-----+
+
+
+    &#34;&#34;&#34;
+    cols = list(map(lambda col_name: F.col(col_name).alias(func(col_name)), df.columns))
+    return df.select(*cols)</code></pre>
+</details>
+</dd>
+<dt id="orca.spark.functions.withSomeColumnsRenamed"><code class="name flex">
+<span>def <span class="ident">withSomeColumnsRenamed</span></span>(<span>df: pyspark.sql.dataframe.DataFrame, mapping: Dict) ‑> pyspark.sql.dataframe.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Changes some of the column names with supplied dictionary</p>
+<h2 id="args">Args</h2>
+<p>df
+: pyspark DataFrame
+mapping
+: Dict</p>
+<h2 id="return">Return</h2>
+<p>pyspark Dataframe
+Example:</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
+mapping = {'amount':'cash','id':'uniqueID','value':'transaction'}
+withSomeColumnsRenamed(df,mapping).show()
++----+--------+-----------+
+|cash|uniqueID|transaction|
++----+--------+-----------+
+|
+2|
+1|
+1|
++----+--------+-----------+</p>
+</blockquote>
+</blockquote>
+</blockquote></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def withSomeColumnsRenamed(df: DataFrame, mapping: Dict) -&gt; DataFrame:
+    &#34;&#34;&#34;
+    Changes some of the column names with supplied dictionary
+    Args:
+        df       : pyspark DataFrame
+        mapping  : Dict
+    Return:
+        pyspark Dataframe
+    Example:
+    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt;mapping = {&#39;amount&#39;:&#39;cash&#39;,&#39;id&#39;:&#39;uniqueID&#39;,&#39;value&#39;:&#39;transaction&#39;}
+    &gt;&gt;&gt;withSomeColumnsRenamed(df,mapping).show()
+        +----+--------+-----------+
+        |cash|uniqueID|transaction|
+        +----+--------+-----------+
+        |   2|       1|          1|
+        +----+--------+-----------+
+
+    &#34;&#34;&#34;
+
+    def _keys(s):
+        return mapping[s]
+
+    def _keysExists(s):
+        return s in mapping
+
+    cols = list(
+        map(
+            lambda col_name: F.col(col_name).alias(_keys(col_name))
+            if _keysExists(col_name)
+            else F.col(col_name),
+            df.columns,
+        )
+    )
+    return df.select(*cols)</code></pre>
 </details>
 </dd>
 </dl>
@@ -410,9 +1002,14 @@ type of join, default will be inner</p>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="orca.spark.functions.addColumnPrefix" href="#orca.spark.functions.addColumnPrefix">addColumnPrefix</a></code></li>
+<li><code><a title="orca.spark.functions.addColumnSuffix" href="#orca.spark.functions.addColumnSuffix">addColumnSuffix</a></code></li>
 <li><code><a title="orca.spark.functions.multijoin" href="#orca.spark.functions.multijoin">multijoin</a></code></li>
 <li><code><a title="orca.spark.functions.performJoin" href="#orca.spark.functions.performJoin">performJoin</a></code></li>
+<li><code><a title="orca.spark.functions.removeColumnSpaces" href="#orca.spark.functions.removeColumnSpaces">removeColumnSpaces</a></code></li>
 <li><code><a title="orca.spark.functions.singleJoin" href="#orca.spark.functions.singleJoin">singleJoin</a></code></li>
+<li><code><a title="orca.spark.functions.withColumnsRenamedFunc" href="#orca.spark.functions.withColumnsRenamedFunc">withColumnsRenamedFunc</a></code></li>
+<li><code><a title="orca.spark.functions.withSomeColumnsRenamed" href="#orca.spark.functions.withSomeColumnsRenamed">withSomeColumnsRenamed</a></code></li>
 </ul>
 </li>
 </ul>

@@ -2,9 +2,6 @@
 
 > Auto-generated documentation modules index.
 
-Full list of [Orca](README.md#orca-index) project modules.
+Full list of [Orca](README.md#functions) project modules.
 
-- [Orca Index](README.md#orca-index)
-- [Orca](orca\index.md#orca)
-    - [Spark](orca\spark\index.md#spark)
-        - [Functions](orca\spark\functions.md#functions)
+- [Functions](README.md#functions)
