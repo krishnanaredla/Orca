@@ -360,17 +360,30 @@ def selectByDtype(df: DataFrame, dtypes: Any) -> DataFrame:
     )
     return df.select(*cols)
 
-def removeByDtype(df:DataFrame,dtypes:Any)->DataFrame:
-    if isinstance(dtypes,list):
+
+def removeByDtype(df: DataFrame, dtypes: Any) -> DataFrame:
+    if isinstance(dtypes, list):
         for val in range(len(dtypes)):
             if dtypes[val] in _type_mappings.keys():
                 dtypes[val] = _type_mappings[dtypes[val]]
         dtypes = tuple(dtypes)
     elif dtypes in _type_mappings.keys():
         dtypes = _type_mappings[dtypes]
-    cols=list(filter(None.__ne__, 
-                     list(map(lambda field:field.name if isinstance(field.dataType,dtypes) else None,df.schema))))
+    cols = list(
+        filter(
+            None.__ne__,
+            list(
+                map(
+                    lambda field: field.name
+                    if isinstance(field.dataType, dtypes)
+                    else None,
+                    df.schema,
+                )
+            ),
+        )
+    )
     return df.select(*[col for col in df.columns if col not in cols])
+
 
 def getColsByDtype(df: DataFrame, dtypes: Any) -> List:
     if isinstance(dtypes, list):
