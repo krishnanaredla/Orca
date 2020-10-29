@@ -56,7 +56,7 @@ Usage :
         |          2|  1|         1|
         |          3|  2|         2|
         +-----------+---+----------+
-
+```
 ## addColumnSuffix
 
 [[find in source code]](..\..\..\orca\spark\functions.py#L178)
@@ -101,7 +101,7 @@ Usage :
         |          2|  1|         1|
         |          3|  2|         2|
         +-----------+---+----------+
-
+```
 ## multijoin
 
 [[find in source code]](..\..\..\orca\spark\functions.py#L73)
@@ -188,7 +188,7 @@ Usage :
     |       1| null|        1|    1|       1|   10|
     |       2|    2|        2|   22|       2|  226|
     +--------+-----+---------+-----+--------+-----+
-
+```
 ## removeColumnSpaces
 
 [[find in source code]](..\..\..\orca\spark\functions.py#L226)
@@ -216,7 +216,7 @@ Usage :
     +----------+---+-----------+
     |         1|  1|          2|
     +----------+---+-----------+
-
+```
 ## singleJoin
 
 [[find in source code]](..\..\..\orca\spark\functions.py#L12)
