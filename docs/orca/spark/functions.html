@@ -68,13 +68,13 @@ def performJoin(
          joinsList      :  list of types of joins between dataframes
     Return:
          DataFrame
-    Example :
+    Usage :
 
-    &gt;&gt;&gt;first  = spark.createDataFrame([{&#39;first_id&#39;: 1, &#39;value&#39;: None}, {&#39;first_id&#39;: 2, &#39;value&#39;: 2}])
-    &gt;&gt;&gt;second = spark.createDataFrame([{&#39;second_id&#39;: 1, &#39;value&#39;: 1}, {&#39;second_id&#39;: 2, &#39;value&#39;: 22}])
-    &gt;&gt;&gt;third  = spark.createDataFrame([{&#39;third_id&#39;: 1, &#39;value&#39;: 10}, {&#39;third_id&#39;: 2, &#39;value&#39;: 226}])
+    &gt;&gt;&gt; first  = spark.createDataFrame([{&#39;first_id&#39;: 1, &#39;value&#39;: None}, {&#39;first_id&#39;: 2, &#39;value&#39;: 2}])
+    &gt;&gt;&gt; second = spark.createDataFrame([{&#39;second_id&#39;: 1, &#39;value&#39;: 1}, {&#39;second_id&#39;: 2, &#39;value&#39;: 22}])
+    &gt;&gt;&gt; third  = spark.createDataFrame([{&#39;third_id&#39;: 1, &#39;value&#39;: 10}, {&#39;third_id&#39;: 2, &#39;value&#39;: 226}])
 
-    &gt;&gt;&gt;performJoin([first,second.hint(&#34;broadcast&#34;),third],[first.first_id==second.second_id,
+    &gt;&gt;&gt; performJoin([first,second.hint(&#34;broadcast&#34;),third],[first.first_id==second.second_id,
                                  second.second_id==third.third_id]).show()
         +--------+-----+---------+-----+--------+-----+
         |first_id|value|second_id|value|third_id|value|
@@ -168,16 +168,16 @@ def addColumnPrefix(
                     Default value will be empty list
     Return:
         pyspark Dataframe
-    Example:
-        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
-        &gt;&gt;&gt;addColumnPrefix(df,prefix=&#39;test&#39;).show()
+    Usage :
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+    &gt;&gt;&gt; addColumnPrefix(df,prefix=&#39;test&#39;).show()
             +-----------+-------+----------+
             |test_amount|test_id|test_value|
             +-----------+-------+----------+
             |          2|      1|         1|
             |          3|      2|         2|
             +-----------+-------+----------+
-        &gt;&gt;&gt;addColumnPrefix(data,prefix=&#39;test&#39;).show()
+    &gt;&gt;&gt; addColumnPrefix(data,prefix=&#39;test&#39;).show()
             +-----------+---+----------+
             |test_amount| id|test_value|
             +-----------+---+----------+
@@ -217,16 +217,16 @@ def addColumnSuffix(
                     Default value will be empty list
     Return:
         pyspark Dataframe
-    Example:
-        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
-        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;).show()
+    Usage :
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+    &gt;&gt;&gt; addColumnSuffix(df,suffix=&#39;test&#39;).show()
             +-----------+-------+----------+
             |amount_test|id_test|value_test|
             +-----------+-------+----------+
             |          2|      1|         1|
             |          3|      2|         2|
             +-----------+-------+----------+
-        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;,colsList=[&#39;id&#39;]).show()
+    &gt;&gt;&gt; addColumnSuffix(df,suffix=&#39;test&#39;,colsList=[&#39;id&#39;]).show()
             +-----------+---+----------+
             |amount_test| id|value_test|
             +-----------+---+----------+
@@ -258,9 +258,10 @@ def removeColumnSpaces(df: DataFrame) -&gt; DataFrame:
         df       : pyspark DataFrame
     Return:
         pyspark Dataframe
-    Example:
-    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;goods value&#39;: 1,&#39;total amount&#39;:2}])
-    &gt;&gt;&gt;removeColumnSpaces(df).show()
+    Usage :
+
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;goods value&#39;: 1,&#39;total amount&#39;:2}])
+    &gt;&gt;&gt; removeColumnSpaces(df).show()
         +----------+---+-----------+
         |goodsvalue| id|totalamount|
         +----------+---+-----------+
@@ -284,15 +285,18 @@ def withSomeColumnsRenamed(df: DataFrame, mapping: Dict) -&gt; DataFrame:
         mapping  : Dict
     Return:
         pyspark Dataframe
-    Example:
-    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
-    &gt;&gt;&gt;mapping = {&#39;amount&#39;:&#39;cash&#39;,&#39;id&#39;:&#39;uniqueID&#39;,&#39;value&#39;:&#39;transaction&#39;}
-    &gt;&gt;&gt;withSomeColumnsRenamed(df,mapping).show()
+    
+    Usage :
+
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt; mapping = {&#39;amount&#39;:&#39;cash&#39;,&#39;id&#39;:&#39;uniqueID&#39;,&#39;value&#39;:&#39;transaction&#39;}
+    &gt;&gt;&gt; withSomeColumnsRenamed(df,mapping).show()
         +----+--------+-----------+
         |cash|uniqueID|transaction|
         +----+--------+-----------+
         |   2|       1|          1|
         +----+--------+-----------+
+    
 
     &#34;&#34;&#34;
 
@@ -321,14 +325,14 @@ def withColumnsRenamedFunc(df: DataFrame, func: Callable) -&gt; DataFrame:
         func     : Function
     Return:
         pyspark Dataframe
-    Example:
-    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
-    &gt;&gt;&gt;def renameF(s):
+    Usage :
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt; def renameF(s):
             if &#39;amount&#39; in s:
                 return &#39;cash&#39;
             else:
                 return s
-    &gt;&gt;&gt;withColumnsRenamedFunc(df,renameF).show()
+    &gt;&gt;&gt; withColumnsRenamedFunc(df,renameF).show()
         +----+---+-----+
         |cash| id|value|
         +----+---+-----+
@@ -364,41 +368,24 @@ colsList : Specify the column names to which only the prefix will be added.
 If nothing is passed, all columns will have the prefix.
 Default value will be empty list</p>
 <h2 id="return">Return</h2>
-<p>pyspark Dataframe</p>
-<h2 id="example">Example</h2>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}, {'id': 2, 'value': 2,'amount':3}])
-addColumnPrefix(df,prefix='test').show()
-+-----------+-------+----------+
-|test_amount|test_id|test_value|
-+-----------+-------+----------+
-|
-2|
-1|
-1|
-|
-3|
-2|
-2|
-+-----------+-------+----------+
-addColumnPrefix(data,prefix='test').show()
-+-----------+&mdash;+----------+
-|test_amount| id|test_value|
-+-----------+&mdash;+----------+
-|
-2|
-1|
-1|
-|
-3|
-2|
-2|
-+-----------+&mdash;+----------+</p>
-</blockquote>
-</blockquote>
-</blockquote></div>
+<p>pyspark Dataframe
+Usage :</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}, {'id': 2, 'value': 2,'amount':3}])
+&gt;&gt;&gt; addColumnPrefix(df,prefix='test').show()
+        +-----------+-------+----------+
+        |test_amount|test_id|test_value|
+        +-----------+-------+----------+
+        |          2|      1|         1|
+        |          3|      2|         2|
+        +-----------+-------+----------+
+&gt;&gt;&gt; addColumnPrefix(data,prefix='test').show()
+        +-----------+---+----------+
+        |test_amount| id|test_value|
+        +-----------+---+----------+
+        |          2|  1|         1|
+        |          3|  2|         2|
+        +-----------+---+----------+
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -417,16 +404,16 @@ addColumnPrefix(data,prefix='test').show()
                     Default value will be empty list
     Return:
         pyspark Dataframe
-    Example:
-        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
-        &gt;&gt;&gt;addColumnPrefix(df,prefix=&#39;test&#39;).show()
+    Usage :
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+    &gt;&gt;&gt; addColumnPrefix(df,prefix=&#39;test&#39;).show()
             +-----------+-------+----------+
             |test_amount|test_id|test_value|
             +-----------+-------+----------+
             |          2|      1|         1|
             |          3|      2|         2|
             +-----------+-------+----------+
-        &gt;&gt;&gt;addColumnPrefix(data,prefix=&#39;test&#39;).show()
+    &gt;&gt;&gt; addColumnPrefix(data,prefix=&#39;test&#39;).show()
             +-----------+---+----------+
             |test_amount| id|test_value|
             +-----------+---+----------+
@@ -467,41 +454,24 @@ colsList : Specify the column names to which only the suffix will be added.
 If nothing is passed, all columns will have the suffix.
 Default value will be empty list</p>
 <h2 id="return">Return</h2>
-<p>pyspark Dataframe</p>
-<h2 id="example">Example</h2>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}, {'id': 2, 'value': 2,'amount':3}])
-addColumnSuffix(df,suffix='test').show()
-+-----------+-------+----------+
-|amount_test|id_test|value_test|
-+-----------+-------+----------+
-|
-2|
-1|
-1|
-|
-3|
-2|
-2|
-+-----------+-------+----------+
-addColumnSuffix(df,suffix='test',colsList=['id']).show()
-+-----------+&mdash;+----------+
-|amount_test| id|value_test|
-+-----------+&mdash;+----------+
-|
-2|
-1|
-1|
-|
-3|
-2|
-2|
-+-----------+&mdash;+----------+</p>
-</blockquote>
-</blockquote>
-</blockquote></div>
+<p>pyspark Dataframe
+Usage :</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}, {'id': 2, 'value': 2,'amount':3}])
+&gt;&gt;&gt; addColumnSuffix(df,suffix='test').show()
+        +-----------+-------+----------+
+        |amount_test|id_test|value_test|
+        +-----------+-------+----------+
+        |          2|      1|         1|
+        |          3|      2|         2|
+        +-----------+-------+----------+
+&gt;&gt;&gt; addColumnSuffix(df,suffix='test',colsList=['id']).show()
+        +-----------+---+----------+
+        |amount_test| id|value_test|
+        +-----------+---+----------+
+        |          2|  1|         1|
+        |          3|  2|         2|
+        +-----------+---+----------+
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -520,16 +490,16 @@ addColumnSuffix(df,suffix='test',colsList=['id']).show()
                     Default value will be empty list
     Return:
         pyspark Dataframe
-    Example:
-        &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
-        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;).show()
+    Usage :
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}, {&#39;id&#39;: 2, &#39;value&#39;: 2,&#39;amount&#39;:3}])
+    &gt;&gt;&gt; addColumnSuffix(df,suffix=&#39;test&#39;).show()
             +-----------+-------+----------+
             |amount_test|id_test|value_test|
             +-----------+-------+----------+
             |          2|      1|         1|
             |          3|      2|         2|
             +-----------+-------+----------+
-        &gt;&gt;&gt;addColumnSuffix(df,suffix=&#39;test&#39;,colsList=[&#39;id&#39;]).show()
+    &gt;&gt;&gt; addColumnSuffix(df,suffix=&#39;test&#39;,colsList=[&#39;id&#39;]).show()
             +-----------+---+----------+
             |amount_test| id|value_test|
             +-----------+---+----------+
@@ -666,37 +636,20 @@ joinsList
 list of types of joins between dataframes</p>
 <h2 id="return">Return</h2>
 <p>DataFrame
-Example :</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>first
-= spark.createDataFrame([{'first_id': 1, 'value': None}, {'first_id': 2, 'value': 2}])
-second = spark.createDataFrame([{'second_id': 1, 'value': 1}, {'second_id': 2, 'value': 22}])
-third
-= spark.createDataFrame([{'third_id': 1, 'value': 10}, {'third_id': 2, 'value': 226}])</p>
-<p>performJoin([first,second.hint("broadcast"),third],[first.first_id==second.second_id,
-second.second_id==third.third_id]).show()
-+--------+-----+---------+-----+--------+-----+
-|first_id|value|second_id|value|third_id|value|
-+--------+-----+---------+-----+--------+-----+
-|
-1| null|
-1|
-1|
-1|
-10|
-|
-2|
-2|
-2|
-22|
-2|
-226|
-+--------+-----+---------+-----+--------+-----+</p>
-</blockquote>
-</blockquote>
-</blockquote></div>
+Usage :</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; first  = spark.createDataFrame([{'first_id': 1, 'value': None}, {'first_id': 2, 'value': 2}])
+&gt;&gt;&gt; second = spark.createDataFrame([{'second_id': 1, 'value': 1}, {'second_id': 2, 'value': 22}])
+&gt;&gt;&gt; third  = spark.createDataFrame([{'third_id': 1, 'value': 10}, {'third_id': 2, 'value': 226}])
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; performJoin([first,second.hint(&quot;broadcast&quot;),third],[first.first_id==second.second_id,
+                             second.second_id==third.third_id]).show()
+    +--------+-----+---------+-----+--------+-----+
+    |first_id|value|second_id|value|third_id|value|
+    +--------+-----+---------+-----+--------+-----+
+    |       1| null|        1|    1|       1|   10|
+    |       2|    2|        2|   22|       2|  226|
+    +--------+-----+---------+-----+--------+-----+
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -716,13 +669,13 @@ second.second_id==third.third_id]).show()
          joinsList      :  list of types of joins between dataframes
     Return:
          DataFrame
-    Example :
+    Usage :
 
-    &gt;&gt;&gt;first  = spark.createDataFrame([{&#39;first_id&#39;: 1, &#39;value&#39;: None}, {&#39;first_id&#39;: 2, &#39;value&#39;: 2}])
-    &gt;&gt;&gt;second = spark.createDataFrame([{&#39;second_id&#39;: 1, &#39;value&#39;: 1}, {&#39;second_id&#39;: 2, &#39;value&#39;: 22}])
-    &gt;&gt;&gt;third  = spark.createDataFrame([{&#39;third_id&#39;: 1, &#39;value&#39;: 10}, {&#39;third_id&#39;: 2, &#39;value&#39;: 226}])
+    &gt;&gt;&gt; first  = spark.createDataFrame([{&#39;first_id&#39;: 1, &#39;value&#39;: None}, {&#39;first_id&#39;: 2, &#39;value&#39;: 2}])
+    &gt;&gt;&gt; second = spark.createDataFrame([{&#39;second_id&#39;: 1, &#39;value&#39;: 1}, {&#39;second_id&#39;: 2, &#39;value&#39;: 22}])
+    &gt;&gt;&gt; third  = spark.createDataFrame([{&#39;third_id&#39;: 1, &#39;value&#39;: 10}, {&#39;third_id&#39;: 2, &#39;value&#39;: 226}])
 
-    &gt;&gt;&gt;performJoin([first,second.hint(&#34;broadcast&#34;),third],[first.first_id==second.second_id,
+    &gt;&gt;&gt; performJoin([first,second.hint(&#34;broadcast&#34;),third],[first.first_id==second.second_id,
                                  second.second_id==third.third_id]).show()
         +--------+-----+---------+-----+--------+-----+
         |first_id|value|second_id|value|third_id|value|
@@ -756,23 +709,15 @@ second.second_id==third.third_id]).show()
 : pyspark DataFrame</p>
 <h2 id="return">Return</h2>
 <p>pyspark Dataframe
-Example:</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>df = spark.createDataFrame([{'id': 1, 'goods value': 1,'total amount':2}])
-removeColumnSpaces(df).show()
-+----------+&mdash;+-----------+
-|goodsvalue| id|totalamount|
-+----------+&mdash;+-----------+
-|
-1|
-1|
-2|
-+----------+&mdash;+-----------+</p>
-</blockquote>
-</blockquote>
-</blockquote></div>
+Usage :</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; df = spark.createDataFrame([{'id': 1, 'goods value': 1,'total amount':2}])
+&gt;&gt;&gt; removeColumnSpaces(df).show()
+    +----------+---+-----------+
+    |goodsvalue| id|totalamount|
+    +----------+---+-----------+
+    |         1|  1|          2|
+    +----------+---+-----------+
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -784,9 +729,10 @@ removeColumnSpaces(df).show()
         df       : pyspark DataFrame
     Return:
         pyspark Dataframe
-    Example:
-    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;goods value&#39;: 1,&#39;total amount&#39;:2}])
-    &gt;&gt;&gt;removeColumnSpaces(df).show()
+    Usage :
+
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;goods value&#39;: 1,&#39;total amount&#39;:2}])
+    &gt;&gt;&gt; removeColumnSpaces(df).show()
         +----------+---+-----------+
         |goodsvalue| id|totalamount|
         +----------+---+-----------+
@@ -854,32 +800,21 @@ func
 : Function</p>
 <h2 id="return">Return</h2>
 <p>pyspark Dataframe
-Example:</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
-def renameF(s):
-if 'amount' in s:
-return 'cash'
-else:
-return s
-withColumnsRenamedFunc(df,renameF).show()
-+----+&mdash;+-----+
-|cash| id|value|
-+----+&mdash;+-----+
-|
-2|
-1|
-1|
-|
-3|
-2|
-2|
-+----+&mdash;+-----+</p>
-</blockquote>
-</blockquote>
-</blockquote></div>
+Usage :</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
+&gt;&gt;&gt; def renameF(s):
+        if 'amount' in s:
+            return 'cash'
+        else:
+            return s
+&gt;&gt;&gt; withColumnsRenamedFunc(df,renameF).show()
+    +----+---+-----+
+    |cash| id|value|
+    +----+---+-----+
+    |   2|  1|    1|
+    |   3|  2|    2|
+    +----+---+-----+
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -892,14 +827,14 @@ withColumnsRenamedFunc(df,renameF).show()
         func     : Function
     Return:
         pyspark Dataframe
-    Example:
-    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
-    &gt;&gt;&gt;def renameF(s):
+    Usage :
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt; def renameF(s):
             if &#39;amount&#39; in s:
                 return &#39;cash&#39;
             else:
                 return s
-    &gt;&gt;&gt;withColumnsRenamedFunc(df,renameF).show()
+    &gt;&gt;&gt; withColumnsRenamedFunc(df,renameF).show()
         +----+---+-----+
         |cash| id|value|
         +----+---+-----+
@@ -924,25 +859,17 @@ withColumnsRenamedFunc(df,renameF).show()
 mapping
 : Dict</p>
 <h2 id="return">Return</h2>
-<p>pyspark Dataframe
-Example:</p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
-mapping = {'amount':'cash','id':'uniqueID','value':'transaction'}
-withSomeColumnsRenamed(df,mapping).show()
-+----+--------+-----------+
-|cash|uniqueID|transaction|
-+----+--------+-----------+
-|
-2|
-1|
-1|
-+----+--------+-----------+</p>
-</blockquote>
-</blockquote>
-</blockquote></div>
+<p>pyspark Dataframe</p>
+<p>Usage :</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
+&gt;&gt;&gt; mapping = {'amount':'cash','id':'uniqueID','value':'transaction'}
+&gt;&gt;&gt; withSomeColumnsRenamed(df,mapping).show()
+    +----+--------+-----------+
+    |cash|uniqueID|transaction|
+    +----+--------+-----------+
+    |   2|       1|          1|
+    +----+--------+-----------+
+</code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -955,15 +882,18 @@ withSomeColumnsRenamed(df,mapping).show()
         mapping  : Dict
     Return:
         pyspark Dataframe
-    Example:
-    &gt;&gt;&gt;df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
-    &gt;&gt;&gt;mapping = {&#39;amount&#39;:&#39;cash&#39;,&#39;id&#39;:&#39;uniqueID&#39;,&#39;value&#39;:&#39;transaction&#39;}
-    &gt;&gt;&gt;withSomeColumnsRenamed(df,mapping).show()
+    
+    Usage :
+
+    &gt;&gt;&gt; df = spark.createDataFrame([{&#39;id&#39;: 1, &#39;value&#39;: 1,&#39;amount&#39;:2}])
+    &gt;&gt;&gt; mapping = {&#39;amount&#39;:&#39;cash&#39;,&#39;id&#39;:&#39;uniqueID&#39;,&#39;value&#39;:&#39;transaction&#39;}
+    &gt;&gt;&gt; withSomeColumnsRenamed(df,mapping).show()
         +----+--------+-----------+
         |cash|uniqueID|transaction|
         +----+--------+-----------+
         |   2|       1|          1|
         +----+--------+-----------+
+    
 
     &#34;&#34;&#34;
 
