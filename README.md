@@ -277,7 +277,7 @@ Usage :
     |   2|  1|    1|
     |   3|  2|    2|
     +----+---+-----+
-
+```
 ## withSomeColumnsRenamed
 
 [[find in source code]](..\..\..\orca\spark\functions.py#L252)
