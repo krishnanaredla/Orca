@@ -1,12 +1,15 @@
 from pyspark.sql import Column
 from pyspark.sql import functions as F
 from pyspark.sql import DataFrame
+from pyspark.sql.types import *
 
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Any, Type
 from collections import defaultdict
 from functools import reduce
 from itertools import cycle
 import re
+import datetime
+import decimal
 
 
 def singleJoin(
@@ -257,7 +260,7 @@ def withSomeColumnsRenamed(df: DataFrame, mapping: Dict) -> DataFrame:
         mapping  : Dict
     Return:
         pyspark Dataframe
-    
+
     Usage :
 
     >>> df = spark.createDataFrame([{'id': 1, 'value': 1,'amount':2}])
@@ -268,7 +271,7 @@ def withSomeColumnsRenamed(df: DataFrame, mapping: Dict) -> DataFrame:
         +----+--------+-----------+
         |   2|       1|          1|
         +----+--------+-----------+
-    
+
 
     """
 
@@ -316,3 +319,67 @@ def withColumnsRenamedFunc(df: DataFrame, func: Callable) -> DataFrame:
     """
     cols = list(map(lambda col_name: F.col(col_name).alias(func(col_name)), df.columns))
     return df.select(*cols)
+
+
+# Mapping Python types to Spark SQL DataType
+_type_mappings = {
+    type(None): NullType,
+    bool: BooleanType,
+    int: LongType,
+    float: DoubleType,
+    str: StringType,
+    bytearray: BinaryType,
+    decimal.Decimal: DecimalType,
+    datetime.date: DateType,
+    datetime.datetime: TimestampType,
+    datetime.time: TimestampType,
+    bytes: BinaryType,
+}
+
+
+def selectByDtype(df: DataFrame, dtypes: Any) -> DataFrame:
+    if isinstance(dtypes, list):
+        for val in range(len(dtypes)):
+            if dtypes[val] in _type_mappings.keys():
+                dtypes[val] = _type_mappings[dtypes[val]]
+        dtypes = tuple(dtypes)
+    elif dtypes in _type_mappings.keys():
+        dtypes = _type_mappings[dtypes]
+    cols = list(
+        filter(
+            None.__ne__,
+            list(
+                map(
+                    lambda field: field.name
+                    if isinstance(field.dataType, dtypes)
+                    else None,
+                    df.schema,
+                )
+            ),
+        )
+    )
+    return df.select(*cols)
+
+
+def getColsByDtype(df: DataFrame, dtypes: Any) -> List:
+    if isinstance(dtypes, list):
+        for val in range(len(dtypes)):
+            if dtypes[val] in _type_mappings.keys():
+                dtypes[val] = _type_mappings[dtypes[val]]
+        dtypes = tuple(dtypes)
+    elif dtypes in _type_mappings.keys():
+        dtypes = _type_mappings[dtypes]
+    cols = list(
+        filter(
+            None.__ne__,
+            list(
+                map(
+                    lambda field: field.name
+                    if isinstance(field.dataType, dtypes)
+                    else None,
+                    df.schema,
+                )
+            ),
+        )
+    )
+    return cols
