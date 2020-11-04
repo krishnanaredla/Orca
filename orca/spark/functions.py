@@ -407,3 +407,8 @@ def getColsByDtype(df: DataFrame, dtypes: Any) -> List:
         )
     )
     return cols
+
+
+def convertSchemaToStr(df: DataFrame) -> DataFrame:
+    cols = list(map(lambda col_name: F.col(col_name).cast(StringType()), df.columns))
+    return df.select(*cols)

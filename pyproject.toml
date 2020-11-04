@@ -6,6 +6,7 @@ authors = ["Krishna Reddy <krishna.gopala@bcbsnc.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
+python-dateutil = "^2.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0"

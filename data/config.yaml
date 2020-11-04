@@ -1,0 +1,26 @@
+tables:
+
+  - name: membership
+    rows: 20000
+    columns:
+      - name : uniqueID
+        column_type : Expression
+        value : numbers
+      - name : Name
+        column_type : Expression
+        value : full_name
+      - name: recID
+        column_type: Expression
+        value : custom_code
+        custom_values:
+           mask : ID#######
+      - name: cost
+        column_type : Expression
+        value: decimals
+        custom_values:
+          start : 10
+          end : 1000
+          precision : 3
+      - name : dates
+        column_type : Expression
+        value: randomTimestamp
