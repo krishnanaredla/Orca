@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "orca"
 version = "0.1.0"
-description = "Helix 3.0 Support functions "
-authors = ["Krishna Reddy <krishna.gopala@bcbsnc.com>"]
+description = "Pyspark Support functions "
+authors = ["Krishna Reddy <gopalkrishna.naredla@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
